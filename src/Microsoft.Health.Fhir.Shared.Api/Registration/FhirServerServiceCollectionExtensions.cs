@@ -72,6 +72,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddSingleton(Options.Options.Create(fhirServerConfiguration.Audit));
             services.AddSingleton(Options.Options.Create(fhirServerConfiguration.Bundle));
             services.AddSingleton(Options.Options.Create(fhirServerConfiguration.Throttling));
+            services.AddSingleton(Options.Options.Create(fhirServerConfiguration.ProfileAndValidation));
             services.AddTransient<IStartupFilter, FhirServerStartupFilter>();
 
             services.RegisterAssemblyModules(Assembly.GetExecutingAssembly(), fhirServerConfiguration);

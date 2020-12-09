@@ -39,23 +39,23 @@ namespace Microsoft.Health.Fhir.Api.Controllers
         [HttpPost]
         [Route(KnownRoutes.ValidateResourceType)]
         [AuditEventType(AuditEventSubType.Read)]
-        public async Task<IActionResult> Validate([FromBody] Resource resource)
+        public async Task<IActionResult> Validate([FromBody] Resource resource, [FromQuery] string profile)
         {
-            return await RunValidationAsync(resource);
+            return await RunValidationAsync(resource, profile);
         }
 
         [HttpPost]
         [Route(KnownRoutes.ValidateResourceTypeById)]
         [AuditEventType(AuditEventSubType.Read)]
         [ValidateResourceIdFilter(true)]
-        public async Task<IActionResult> ValidateById([FromBody] Resource resource)
+        public async Task<IActionResult> ValidateById([FromBody] Resource resource, [FromQuery] string profile)
         {
-            return await RunValidationAsync(resource);
+            return await RunValidationAsync(resource, profile);
         }
 
-        private async Task<IActionResult> RunValidationAsync(Resource resource)
+        private async Task<IActionResult> RunValidationAsync(Resource resource, string profile)
         {
-            var response = await _mediator.Send<ValidateOperationResponse>(new ValidateOperationRequest(resource.ToResourceElement()));
+            var response = await _mediator.Send<ValidateOperationResponse>(new ValidateOperationRequest(resource.ToResourceElement(), profile));
 
             return FhirResult.Create(new OperationOutcome
             {

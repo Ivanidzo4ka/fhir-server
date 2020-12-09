@@ -76,11 +76,6 @@ namespace Microsoft.Health.Fhir.Api.Features.Filters
             }
 
             ParseMode(mode, idMode);
-
-            if (profile != null)
-            {
-                throw new OperationNotImplementedException(Api.Resources.ValidateWithProfileNotSupported);
-            }
         }
 
         private static void ParseParameters(Parameters resource, ref string profile, ref string mode)

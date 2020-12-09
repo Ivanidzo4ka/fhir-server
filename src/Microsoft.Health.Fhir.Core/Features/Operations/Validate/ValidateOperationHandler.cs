@@ -10,6 +10,7 @@ using MediatR;
 using Microsoft.Health.Fhir.Core.Exceptions;
 using Microsoft.Health.Fhir.Core.Features.Security;
 using Microsoft.Health.Fhir.Core.Features.Security.Authorization;
+using Microsoft.Health.Fhir.Core.Features.Validation.Profiles;
 using Microsoft.Health.Fhir.Core.Messages.Operation;
 using Microsoft.Health.Fhir.Core.Models;
 
@@ -24,11 +25,15 @@ namespace Microsoft.Health.Fhir.Core.Features.Validation
 
         private readonly IFhirAuthorizationService _authorizationService;
 
-        public ValidateOperationHandler(IFhirAuthorizationService authorizationService)
+        private readonly IProfileValidator _profileValidator;
+
+        public ValidateOperationHandler(IFhirAuthorizationService authorizationService, IProfileValidator profileValidator)
         {
             EnsureArg.IsNotNull(authorizationService, nameof(authorizationService));
+            EnsureArg.IsNotNull(profileValidator, nameof(profileValidator));
 
             _authorizationService = authorizationService;
+            _profileValidator = profileValidator;
         }
 
         /// <summary>
@@ -41,6 +46,11 @@ namespace Microsoft.Health.Fhir.Core.Features.Validation
             if (await _authorizationService.CheckAccess(DataActions.ResourceValidate) != DataActions.ResourceValidate)
             {
                 throw new UnauthorizedFhirActionException();
+            }
+
+            if (!_profileValidator.TryValidate(request.Resource.Instance, false, request.Profile, out var outcomeIssues))
+            {
+                return new ValidateOperationResponse(outcomeIssues);
             }
 
             return new ValidateOperationResponse(ValidationPassed);

@@ -11,12 +11,15 @@ namespace Microsoft.Health.Fhir.Core.Messages.Operation
 {
     public class ValidateOperationRequest : IRequest<ValidateOperationResponse>, IRequest
     {
-        public ValidateOperationRequest(ResourceElement resourceElement)
+        public ValidateOperationRequest(ResourceElement resourceElement, string profileUrl = null)
         {
             EnsureArg.IsNotNull(resourceElement, nameof(resourceElement));
             Resource = resourceElement;
+            Profile = profileUrl;
         }
 
         public ResourceElement Resource { get; }
+
+        public string Profile { get; }
     }
 }

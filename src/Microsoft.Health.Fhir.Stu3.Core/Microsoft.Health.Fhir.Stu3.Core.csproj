@@ -15,12 +15,14 @@
   <ItemGroup>
     <Compile Include="..\Microsoft.Health.Fhir.Shared.Core\Operations\Export\ExportAnonymizer.cs" Link="Features\Operations\Export\ExportAnonymizer.cs" />
     <Compile Include="..\Microsoft.Health.Fhir.Shared.Core\Operations\Export\ExportAnonymizerFactory.cs" Link="Features\Operations\Export\ExportAnonymizerFactory.cs" />
+    <Compile Include="..\Microsoft.Health.Fhir.Shared.Core\Operations\Validate\ProfileValidator.cs" Link="Features\Operations\Validate\ProfileValidator.cs" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="AngleSharp" Version="0.14.0" />
     <PackageReference Include="Ensure.That" Version="9.2.0" />
     <PackageReference Include="FluentValidation" Version="8.6.1" />
+    <PackageReference Include="Hl7.Fhir.Specification.STU3" Version="1.9.0" />
     <PackageReference Include="MediatR" Version="9.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="3.1.9" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="3.1.9" />
@@ -37,6 +39,7 @@
 
   <ItemGroup>
     <Folder Include="Features\Operations\Export\" />
+    <Folder Include="Features\Operations\Validate\" />
   </ItemGroup>
 
   <Import Project="..\Microsoft.Health.Fhir.Shared.Core\Microsoft.Health.Fhir.Shared.Core.projitems" Label="Shared" />
