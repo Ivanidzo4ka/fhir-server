@@ -119,7 +119,15 @@ namespace Microsoft.Health.Fhir.CosmosDb.Features.Search.Queries
                     AppendSubquery(parameterName: null, expression.Expression, context);
                     break;
                 default:
-                    AppendSubquery(expression.Parameter.Name, expression.Expression, context);
+                    if (expression.Expression is NotExpression notExpression)
+                    {
+                        AppendSubquery(expression.Parameter.Name, notExpression.Expression, context, true);
+                    }
+                    else
+                    {
+                        AppendSubquery(expression.Parameter.Name, expression.Expression, context);
+                    }
+
                     break;
             }
 
@@ -209,6 +217,14 @@ namespace Microsoft.Health.Fhir.CosmosDb.Features.Search.Queries
             return null;
         }
 
+        public object VisitNotExpression(NotExpression expression, Context context)
+        {
+            _queryBuilder.Append("NOT (");
+            expression.Expression.AcceptVisitor(this, context);
+            _queryBuilder.Append(")");
+            return null;
+        }
+
         public object VisitMultiary(MultiaryExpression expression, Context context)
         {
             MultiaryOperator op = expression.MultiaryOperation;
@@ -226,17 +242,17 @@ namespace Microsoft.Health.Fhir.CosmosDb.Features.Search.Queries
                     break;
 
                 default:
-                {
-                    string message = string.Format(
-                        CultureInfo.InvariantCulture,
-                        Resources.UnhandledEnumValue,
-                        nameof(MultiaryOperator),
-                        op);
+                    {
+                        string message = string.Format(
+                            CultureInfo.InvariantCulture,
+                            Resources.UnhandledEnumValue,
+                            nameof(MultiaryOperator),
+                            op);
 
-                    Debug.Fail(message);
+                        Debug.Fail(message);
 
-                    throw new InvalidOperationException(message);
-                }
+                        throw new InvalidOperationException(message);
+                    }
             }
 
             if (op == MultiaryOperator.Or)

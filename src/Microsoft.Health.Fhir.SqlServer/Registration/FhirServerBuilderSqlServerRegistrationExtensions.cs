@@ -70,7 +70,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
             AddSqlServerTableRowParameterGenerators(services);
 
-            services.Add<NormalizedSearchParameterQueryGeneratorFactory>()
+            services.Add<SearchParamTableExpressionQueryGeneratorFactory>()
                 .Singleton()
                 .AsSelf();
 
@@ -79,10 +79,6 @@ namespace Microsoft.Extensions.DependencyInjection
                 .AsSelf();
 
             services.Add<ChainFlatteningRewriter>()
-                .Singleton()
-                .AsSelf();
-
-            services.Add<StringOverflowRewriter>()
                 .Singleton()
                 .AsSelf();
 

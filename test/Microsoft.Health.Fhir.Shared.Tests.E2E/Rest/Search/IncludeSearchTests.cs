@@ -5,7 +5,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Web;
 using Hl7.Fhir.Model;
@@ -93,7 +92,7 @@ namespace Microsoft.Health.Fhir.Tests.E2E.Rest.Search
         }
 
         [Fact]
-        public async Task GivenAnIncludeSearchExpressionWithOnlyDenormalizedPredicates_WhenSearched_ThenCorrectBundleShouldBeReturned()
+        public async Task GivenAnIncludeSearchExpressionWithOnlyResourceTablePredicates_WhenSearched_ThenCorrectBundleShouldBeReturned()
         {
             string lastUpdatedString = Uri.EscapeDataString(Fixture.PatientGroup.Meta.LastUpdated.Value.ToString("o"));
 
@@ -103,7 +102,7 @@ namespace Microsoft.Health.Fhir.Tests.E2E.Rest.Search
         }
 
         [Fact]
-        public async Task GivenAnIncludeSearchExpressionWithMultipleDenormalizedParameters_WhenSearched_ThenCorrectBundleShouldBeReturned()
+        public async Task GivenAnIncludeSearchExpressionWithMultipleResourceTableParameters_WhenSearched_ThenCorrectBundleShouldBeReturned()
         {
             var guid = Guid.NewGuid().ToString();
             var organizationResponse = await Client.CreateAsync(new Organization());
@@ -240,7 +239,7 @@ namespace Microsoft.Health.Fhir.Tests.E2E.Rest.Search
         }
 
         [Fact]
-        public async Task GivenAnIncludeSearchExpressionWithMultipleDenormalizedParametersAndTableParameters_WhenSearched_ThenCorrectBundleShouldBeReturned()
+        public async Task GivenAnIncludeSearchExpressionWithMultipleResourceTableParametersAndTableParameters_WhenSearched_ThenCorrectBundleShouldBeReturned()
         {
             var newDiagnosticReportResponse = await Fixture.TestFhirClient.CreateAsync(
                 new DiagnosticReport
@@ -289,8 +288,23 @@ namespace Microsoft.Health.Fhir.Tests.E2E.Rest.Search
                 Fixture.SmithSnomedObservation,
                 Fixture.TrumanLoincObservation,
                 Fixture.TrumanSnomedObservation,
+                Fixture.ObservationWithUntypedReferences,
                 Fixture.Practitioner,
                 Fixture.Organization);
+
+            ValidateSearchEntryMode(bundle, ResourceType.Observation);
+        }
+
+        [Fact]
+        public async Task GivenAnIncludeSearchExpression_WhenSearched_DoesNotIncludeUntypedReferences()
+        {
+            string query = $"_id={Fixture.ObservationWithUntypedReferences.Id}&_include=Observation:*";
+
+            Bundle bundle = await Client.SearchAsync(ResourceType.Observation, query);
+
+            ValidateBundle(
+                bundle,
+                Fixture.ObservationWithUntypedReferences);
 
             ValidateSearchEntryMode(bundle, ResourceType.Observation);
         }
@@ -446,7 +460,7 @@ namespace Microsoft.Health.Fhir.Tests.E2E.Rest.Search
         }
 
         [Fact]
-        public async Task GivenARevIncludeSearchExpressionWithMultipleDenormalizedParametersAndTableParameters_WhenSearched_ThenCorrectBundleShouldBeReturned()
+        public async Task GivenARevIncludeSearchExpressionWithMultipleResourceTableParametersAndTableParameters_WhenSearched_ThenCorrectBundleShouldBeReturned()
         {
             var newDiagnosticReportResponse = await Fixture.TestFhirClient.CreateAsync(
                 new DiagnosticReport

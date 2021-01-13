@@ -43,7 +43,6 @@ namespace Microsoft.Health.Fhir.SqlServer.Features.Search
 
         private readonly SortRewriter _sortRewriter;
         private readonly ChainFlatteningRewriter _chainFlatteningRewriter;
-        private readonly StringOverflowRewriter _stringOverflowRewriter;
         private readonly ILogger<SqlServerSearchService> _logger;
         private readonly BitColumn _isMatch = new BitColumn("IsMatch");
         private readonly BitColumn _isPartial = new BitColumn("IsPartial");
@@ -59,7 +58,6 @@ namespace Microsoft.Health.Fhir.SqlServer.Features.Search
             SqlServerFhirModel model,
             SqlRootExpressionRewriter sqlRootExpressionRewriter,
             ChainFlatteningRewriter chainFlatteningRewriter,
-            StringOverflowRewriter stringOverflowRewriter,
             SortRewriter sortRewriter,
             SqlConnectionWrapperFactory sqlConnectionWrapperFactory,
             SchemaInformation schemaInformation,
@@ -70,7 +68,6 @@ namespace Microsoft.Health.Fhir.SqlServer.Features.Search
         {
             EnsureArg.IsNotNull(sqlRootExpressionRewriter, nameof(sqlRootExpressionRewriter));
             EnsureArg.IsNotNull(chainFlatteningRewriter, nameof(chainFlatteningRewriter));
-            EnsureArg.IsNotNull(stringOverflowRewriter, nameof(stringOverflowRewriter));
             EnsureArg.IsNotNull(sqlConnectionWrapperFactory, nameof(sqlConnectionWrapperFactory));
             EnsureArg.IsNotNull(schemaInformation, nameof(schemaInformation));
             EnsureArg.IsNotNull(sortingValidator, nameof(sortingValidator));
@@ -81,7 +78,6 @@ namespace Microsoft.Health.Fhir.SqlServer.Features.Search
             _sqlRootExpressionRewriter = sqlRootExpressionRewriter;
             _sortRewriter = sortRewriter;
             _chainFlatteningRewriter = chainFlatteningRewriter;
-            _stringOverflowRewriter = stringOverflowRewriter;
             _sqlConnectionWrapperFactory = sqlConnectionWrapperFactory;
             _logger = logger;
 
@@ -176,19 +172,21 @@ namespace Microsoft.Health.Fhir.SqlServer.Features.Search
                                                ?.AcceptVisitor(LastUpdatedToResourceSurrogateIdRewriter.Instance)
                                                .AcceptVisitor(DateTimeEqualityRewriter.Instance)
                                                .AcceptVisitor(FlatteningRewriter.Instance)
+                                               .AcceptVisitor(UntypedReferenceRewriter.Instance)
                                                .AcceptVisitor(_sqlRootExpressionRewriter)
                                                .AcceptVisitor(_sortRewriter, searchOptions)
-                                               .AcceptVisitor(DenormalizedPredicateRewriter.Instance)
-                                               .AcceptVisitor(NormalizedPredicateReorderer.Instance)
-                                               .AcceptVisitor(_chainFlatteningRewriter)
-                                               .AcceptVisitor(DateTimeBoundedRangeRewriter.Instance)
-                                               .AcceptVisitor(_stringOverflowRewriter)
-                                               .AcceptVisitor(NumericRangeRewriter.Instance)
+                                               .AcceptVisitor(SearchParamTableExpressionReorderer.Instance)
                                                .AcceptVisitor(MissingSearchParamVisitor.Instance)
-                                               .AcceptVisitor(IncludeDenormalizedRewriter.Instance)
+                                               .AcceptVisitor(NotExpressionRewriter.Instance)
+                                               .AcceptVisitor(_chainFlatteningRewriter)
+                                               .AcceptVisitor(ResourceColumnPredicatePushdownRewriter.Instance)
+                                               .AcceptVisitor(DateTimeBoundedRangeRewriter.Instance)
+                                               .AcceptVisitor(StringOverflowRewriter.Instance)
+                                               .AcceptVisitor(NumericRangeRewriter.Instance)
+                                               .AcceptVisitor(IncludeMatchSeedRewriter.Instance)
                                                .AcceptVisitor(TopRewriter.Instance, searchOptions)
                                                .AcceptVisitor(IncludeRewriter.Instance)
-                                           ?? SqlRootExpression.WithDenormalizedExpressions();
+                                           ?? SqlRootExpression.WithResourceTableExpressions();
 
             using (SqlConnectionWrapper sqlConnectionWrapper = await _sqlConnectionWrapperFactory.ObtainSqlConnectionWrapperAsync(cancellationToken, true))
             using (SqlCommandWrapper sqlCommandWrapper = sqlConnectionWrapper.CreateSqlCommand())
@@ -210,7 +208,12 @@ namespace Microsoft.Health.Fhir.SqlServer.Features.Search
                     if (searchOptions.CountOnly)
                     {
                         await reader.ReadAsync(cancellationToken);
-                        return new SearchResult(reader.GetInt32(0), searchOptions.UnsupportedSearchParams);
+                        var searchResult = new SearchResult(reader.GetInt32(0), searchOptions.UnsupportedSearchParams);
+
+                        // call NextResultAsync to get the info messages
+                        await reader.NextResultAsync(cancellationToken);
+
+                        return searchResult;
                     }
 
                     var resources = new List<SearchResultEntry>(searchOptions.MaxItemCount);

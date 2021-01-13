@@ -99,8 +99,16 @@ namespace Microsoft.Health.Fhir.Core.Features.Operations
 
         public const string StorageAccountContainerName = "storageAccountContainerName";
 
+        public const string Filters = "filters";
+
+        public const string CurrentFilter = "currentFilter";
+
+        public const string FilteredSearchesComplete = "FilteredSearchesComplete";
+
         public const string ResourceTypeSearchParameterHashMap = "resourceTypeSearchParameterHashMap";
 
         public const string ExportFormat = "exportFormat";
+
+        public const string Issues = "issues";
     }
 }

@@ -30,5 +30,11 @@ namespace Microsoft.Health.Fhir.Tests.Common
         public const string ExportDataValidation = "ExportDataValidation";
 
         public const string SmartOnFhir = "SmartOnFhir";
+
+        public const string ConvertData = "ConvertData";
+
+        public const string CustomConvertData = "CustomConvertData";
+
+        public const string CustomSearch = "CustomSearch";
     }
 }

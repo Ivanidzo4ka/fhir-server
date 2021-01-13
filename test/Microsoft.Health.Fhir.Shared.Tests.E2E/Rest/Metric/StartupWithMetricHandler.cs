@@ -8,10 +8,12 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Health.Extensions.DependencyInjection;
 using Microsoft.Health.Fhir.Api.Features.ApiNotifications;
+using Microsoft.Health.Fhir.Core.Features.Operations.Export;
 using Microsoft.Health.Fhir.CosmosDb.Features.Metrics;
 
 namespace Microsoft.Health.Fhir.Shared.Tests.E2E.Rest.Metric
 {
+    [RequiresIsolatedDatabase]
     public class StartupWithMetricHandler : StartupBaseForCustomProviders
     {
         public StartupWithMetricHandler(IConfiguration configuration)
@@ -26,7 +28,8 @@ namespace Microsoft.Health.Fhir.Shared.Tests.E2E.Rest.Metric
             services.Add<MetricHandler>()
                 .Singleton()
                 .AsService<INotificationHandler<ApiResponseNotification>>()
-                .AsService<INotificationHandler<CosmosStorageRequestMetricsNotification>>();
+                .AsService<INotificationHandler<CosmosStorageRequestMetricsNotification>>()
+                .AsService<INotificationHandler<ExportTaskMetricsNotification>>();
         }
     }
 }
