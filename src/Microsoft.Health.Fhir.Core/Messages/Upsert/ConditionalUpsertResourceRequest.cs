@@ -12,20 +12,16 @@ using Microsoft.Health.Fhir.Core.Models;
 
 namespace Microsoft.Health.Fhir.Core.Messages.Upsert
 {
-    public class ConditionalUpsertResourceRequest : IRequest<UpsertResourceResponse>, IRequest, IRequireCapability
+    public class ConditionalUpsertResourceRequest : RequestWithResourceForUpsert, IRequest, IRequireCapability
     {
         public ConditionalUpsertResourceRequest(ResourceElement resource, IReadOnlyList<Tuple<string, string>> conditionalParameters)
+            : base(resource)
         {
-            EnsureArg.IsNotNull(resource, nameof(resource));
             EnsureArg.IsNotNull(conditionalParameters, nameof(conditionalParameters));
-
-            Resource = resource;
             ConditionalParameters = conditionalParameters;
         }
 
         public IReadOnlyList<Tuple<string, string>> ConditionalParameters { get; }
-
-        public ResourceElement Resource { get; }
 
         public IEnumerable<CapabilityQuery> RequiredCapabilities()
         {

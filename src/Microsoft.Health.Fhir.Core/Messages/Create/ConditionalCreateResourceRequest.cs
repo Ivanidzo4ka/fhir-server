@@ -8,23 +8,19 @@ using System.Collections.Generic;
 using EnsureThat;
 using MediatR;
 using Microsoft.Health.Fhir.Core.Features.Conformance;
-using Microsoft.Health.Fhir.Core.Messages.Upsert;
 using Microsoft.Health.Fhir.Core.Models;
 
 namespace Microsoft.Health.Fhir.Core.Messages.Create
 {
-    public class ConditionalCreateResourceRequest : IRequest<UpsertResourceResponse>, IRequest, IRequireCapability
+    public class ConditionalCreateResourceRequest : RequestWithResourceForUpsert, IRequest, IRequireCapability
     {
         public ConditionalCreateResourceRequest(ResourceElement resource, IReadOnlyList<Tuple<string, string>> conditionalParameters)
+            : base(resource)
         {
-            EnsureArg.IsNotNull(resource, nameof(resource));
             EnsureArg.IsNotNull(conditionalParameters, nameof(conditionalParameters));
 
-            Resource = resource;
             ConditionalParameters = conditionalParameters;
         }
-
-        public ResourceElement Resource { get; }
 
         public IReadOnlyList<Tuple<string, string>> ConditionalParameters { get; }
 

@@ -4,12 +4,16 @@
 // -------------------------------------------------------------------------------------------------
 
 using Hl7.Fhir.ElementModel;
-using Microsoft.Health.Fhir.Core.Models;
 
 namespace Microsoft.Health.Fhir.Core.Features.Validation.Profiles
 {
     public interface IProfileValidator
     {
-        bool TryValidate(ITypedElement element, bool resolveReferences, string profileUrl, out OperationOutcomeIssue[] outcomeIssues);
+        /// <summary>
+        /// Validate element to profile, and throw <see cref="ProfileValidationFailedException"/> if element is not valid.
+        /// </summary>
+        /// <param name="element">Element to validate.</param>
+        /// <param name="profileUrl">Profile url to check. If <see langword="null"/>> we will validate according to meta profiles in element.</param>
+        void Validate(ITypedElement element, string profileUrl = null);
     }
 }

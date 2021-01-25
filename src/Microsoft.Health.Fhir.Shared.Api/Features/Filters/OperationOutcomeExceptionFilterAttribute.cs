@@ -25,6 +25,7 @@ using Microsoft.Health.Fhir.Core.Features.Operations.ConvertData.Models;
 using Microsoft.Health.Fhir.Core.Features.Persistence;
 using Microsoft.Health.Fhir.Core.Features.Search;
 using Microsoft.Health.Fhir.Core.Features.Validation;
+using Microsoft.Health.Fhir.Shared.Core.Operations.Validate;
 using Microsoft.Net.Http.Headers;
 
 namespace Microsoft.Health.Fhir.Api.Features.Filters
@@ -145,6 +146,9 @@ namespace Microsoft.Health.Fhir.Api.Features.Filters
                         break;
                     case ConfigureCustomSearchException _:
                         operationOutcomeResult.StatusCode = HttpStatusCode.FailedDependency;
+                        break;
+                    case ProfileValidationFailedException _:
+                        operationOutcomeResult.StatusCode = HttpStatusCode.OK;
                         break;
                 }
 

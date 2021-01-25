@@ -4,7 +4,6 @@
 // -------------------------------------------------------------------------------------------------
 
 using System.Collections.Generic;
-using EnsureThat;
 using MediatR;
 using Microsoft.Health.Fhir.Core.Features.Conformance;
 using Microsoft.Health.Fhir.Core.Features.Persistence;
@@ -12,17 +11,13 @@ using Microsoft.Health.Fhir.Core.Models;
 
 namespace Microsoft.Health.Fhir.Core.Messages.Upsert
 {
-    public class UpsertResourceRequest : IRequest<UpsertResourceResponse>, IRequest, IRequireCapability
+    public class UpsertResourceRequest : RequestWithResourceForUpsert, IRequest, IRequireCapability
     {
         public UpsertResourceRequest(ResourceElement resource, WeakETag weakETag = null)
+            : base(resource)
         {
-            EnsureArg.IsNotNull(resource, nameof(resource));
-
-            Resource = resource;
             WeakETag = weakETag;
         }
-
-        public ResourceElement Resource { get; }
 
         public WeakETag WeakETag { get; }
 

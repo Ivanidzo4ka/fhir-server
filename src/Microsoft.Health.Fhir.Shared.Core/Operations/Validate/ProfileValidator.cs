@@ -15,6 +15,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.Health.Fhir.Core.Configs;
 using Microsoft.Health.Fhir.Core.Features.Validation.Profiles;
 using Microsoft.Health.Fhir.Core.Models;
+using Microsoft.Health.Fhir.Shared.Core.Operations.Validate;
 
 // TODO: Move me to Feature.Validation folder.
 namespace Microsoft.Health.Fhir.Core.Features.Operations.Validate
@@ -51,41 +52,29 @@ namespace Microsoft.Health.Fhir.Core.Features.Operations.Validate
             }
         }
 
-        private Validator GetValidator(bool resolveReferences)
+        private Validator GetValidator()
         {
             var ctx = new ValidationSettings()
             {
                 ResourceResolver = _resolver,
                 GenerateSnapshot = true,
                 Trace = false,
-                ResolveExternalReferences = resolveReferences,
+                ResolveExternalReferences = false,
             };
 
             var validator = new Validator(ctx);
-            if (resolveReferences)
-            {
-                validator.OnExternalResolutionNeeded += Validator_OnExternalResolutionNeeded;
-            }
 
             return validator;
         }
 
-        private void Validator_OnExternalResolutionNeeded(object sender, OnResolveResourceReferenceEventArgs e)
-        {
-            // DO SOMETHING HERE TO RESOVE REFERENCE.
-            // e.Reference
-        }
-
-        public bool TryValidate(ITypedElement instance, bool resolveReferences, string profileUrl, out OperationOutcomeIssue[] outcomeIssues)
+        public void Validate(ITypedElement instance, string profileUrl = null)
         {
             if (!_configuration.Enabled)
             {
                 throw new NotSupportedException("Validation shouldn't be invoked if it's disabled in configuration");
             }
 
-            var validator = GetValidator(resolveReferences);
-
-            outcomeIssues = null;
+            var validator = GetValidator();
             OperationOutcome result;
             if (!string.IsNullOrWhiteSpace(profileUrl))
             {
@@ -105,11 +94,11 @@ namespace Microsoft.Health.Fhir.Core.Features.Operations.Validate
 
             if (result.Success)
             {
-                return true;
+                return;
             }
             else
             {
-                outcomeIssues = new OperationOutcomeIssue[result.Issue.Count];
+                var outcomeIssues = new OperationOutcomeIssue[result.Issue.Count];
                 var index = 0;
                 foreach (var issue in result.Issue)
                 {
@@ -122,7 +111,7 @@ namespace Microsoft.Health.Fhir.Core.Features.Operations.Validate
                         location: issue.Location.ToArray());
                 }
 
-                return false;
+                throw new ProfileValidationFailedException(outcomeIssues);
             }
         }
     }

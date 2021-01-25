@@ -48,10 +48,7 @@ namespace Microsoft.Health.Fhir.Core.Features.Validation
                 throw new UnauthorizedFhirActionException();
             }
 
-            if (!_profileValidator.TryValidate(request.Resource.Instance, false, request.Profile, out var outcomeIssues))
-            {
-                return new ValidateOperationResponse(outcomeIssues);
-            }
+            _profileValidator.Validate(request.Resource.Instance, request.Profile);
 
             return new ValidateOperationResponse(ValidationPassed);
         }

@@ -4,24 +4,18 @@
 // -------------------------------------------------------------------------------------------------
 
 using System.Collections.Generic;
-using EnsureThat;
 using MediatR;
 using Microsoft.Health.Fhir.Core.Features.Conformance;
-using Microsoft.Health.Fhir.Core.Messages.Upsert;
 using Microsoft.Health.Fhir.Core.Models;
 
 namespace Microsoft.Health.Fhir.Core.Messages.Create
 {
-    public class CreateResourceRequest : IRequest<UpsertResourceResponse>, IRequest, IRequireCapability
+    public class CreateResourceRequest : RequestWithResourceForUpsert, IRequest, IRequireCapability
     {
         public CreateResourceRequest(ResourceElement resource)
+            : base(resource)
         {
-            EnsureArg.IsNotNull(resource, nameof(resource));
-
-            Resource = resource;
         }
-
-        public ResourceElement Resource { get; }
 
         public IEnumerable<CapabilityQuery> RequiredCapabilities()
         {

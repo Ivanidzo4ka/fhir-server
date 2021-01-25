@@ -29,7 +29,6 @@ namespace Microsoft.Health.Fhir.Api.Features.Formatters
 
             _parser = parser;
             _charPool = new JsonArrayPool(charPool);
-
             SupportedEncodings.Add(UTF8EncodingWithoutBOM);
             SupportedEncodings.Add(UTF16EncodingLittleEndian);
             SupportedMediaTypes.Add(KnownContentTypes.JsonContentType);
