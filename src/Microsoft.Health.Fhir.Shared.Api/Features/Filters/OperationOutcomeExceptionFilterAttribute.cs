@@ -17,6 +17,7 @@ using Microsoft.Health.Api.Features.Audit;
 using Microsoft.Health.Fhir.Api.Features.ActionResults;
 using Microsoft.Health.Fhir.Api.Features.Bundle;
 using Microsoft.Health.Fhir.Api.Features.Exceptions;
+using Microsoft.Health.Fhir.Api.Features.Headers;
 using Microsoft.Health.Fhir.Core.Exceptions;
 using Microsoft.Health.Fhir.Core.Extensions;
 using Microsoft.Health.Fhir.Core.Features.Context;
@@ -33,7 +34,6 @@ namespace Microsoft.Health.Fhir.Api.Features.Filters
     [AttributeUsage(AttributeTargets.Class)]
     internal class OperationOutcomeExceptionFilterAttribute : ActionFilterAttribute
     {
-        private const string RetryAfterHeaderName = "x-ms-retry-after-ms";
         private const string ValidateController = "Validate";
 
         private readonly IFhirRequestContextAccessor _fhirRequestContextAccessor;
@@ -105,6 +105,7 @@ namespace Microsoft.Health.Fhir.Api.Features.Filters
                     case BadRequestException _:
                     case RequestNotValidException _:
                     case BundleEntryLimitExceededException _:
+                    case ProvenanceHeaderException _:
                         operationOutcomeResult.StatusCode = HttpStatusCode.BadRequest;
                         break;
                     case ResourceConflictException _:
@@ -136,7 +137,9 @@ namespace Microsoft.Health.Fhir.Api.Features.Filters
                     case FhirTransactionFailedException fhirTransactionFailedException:
                         operationOutcomeResult.StatusCode = fhirTransactionFailedException.ResponseStatusCode;
                         break;
-                    case AzureContainerRegistryTokenException _:
+                    case AzureContainerRegistryTokenException azureContainerRegistryTokenException:
+                        operationOutcomeResult.StatusCode = azureContainerRegistryTokenException.StatusCode;
+                        break;
                     case FetchTemplateCollectionFailedException _:
                     case ConvertDataUnhandledException _:
                         operationOutcomeResult.StatusCode = HttpStatusCode.InternalServerError;
@@ -166,9 +169,7 @@ namespace Microsoft.Health.Fhir.Api.Features.Filters
 
                         if (ex.RetryAfter != null)
                         {
-                            healthExceptionResult.Headers.Add(
-                                RetryAfterHeaderName,
-                                ex.RetryAfter.Value.TotalMilliseconds.ToString(CultureInfo.InvariantCulture));
+                            healthExceptionResult.Headers.AddRetryAfterHeaders(ex.RetryAfter.Value);
                         }
 
                         break;

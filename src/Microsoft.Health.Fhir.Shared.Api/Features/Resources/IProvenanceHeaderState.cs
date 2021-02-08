@@ -3,11 +3,10 @@
 // Licensed under the MIT License (MIT). See LICENSE in the repo root for license information.
 // -------------------------------------------------------------------------------------------------
 
-namespace Microsoft.Health.Fhir.Api.Features.Headers
+namespace Microsoft.Health.Fhir.Api.Features.Resources
 {
-    public static class KnownFhirHeaders
+    public interface IProvenanceHeaderState
     {
-        public const string IfNoneExist = "If-None-Exist";
-        public const string PartiallyIndexedParamsHeaderName = "x-ms-use-partial-indices";
+        bool Intercepted { get; set; }
     }
 }

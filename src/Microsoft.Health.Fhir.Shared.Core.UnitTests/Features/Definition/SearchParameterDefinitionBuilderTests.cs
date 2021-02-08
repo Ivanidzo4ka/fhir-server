@@ -4,6 +4,7 @@
 // -------------------------------------------------------------------------------------------------
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using Hl7.Fhir.Model;
@@ -25,13 +26,13 @@ namespace Microsoft.Health.Fhir.Core.UnitTests.Features.Definition
         private readonly string _invalidEntriesFile = "SearchParametersWithInvalidEntries.json";
         private readonly string _invalidDefinitionsFile = "SearchParametersWithInvalidDefinitions.json";
         private readonly string _validEntriesFile = "SearchParameters.json";
-        private readonly Dictionary<Uri, SearchParameterInfo> _uriDictionary;
-        private readonly Dictionary<string, IDictionary<string, SearchParameterInfo>> _resourceTypeDictionary;
+        private readonly ConcurrentDictionary<Uri, SearchParameterInfo> _uriDictionary;
+        private readonly ConcurrentDictionary<string, ConcurrentDictionary<string, SearchParameterInfo>> _resourceTypeDictionary;
 
         public SearchParameterDefinitionBuilderTests()
         {
-            _uriDictionary = new Dictionary<Uri, SearchParameterInfo>();
-            _resourceTypeDictionary = new Dictionary<string, IDictionary<string, SearchParameterInfo>>();
+            _uriDictionary = new ConcurrentDictionary<Uri, SearchParameterInfo>();
+            _resourceTypeDictionary = new ConcurrentDictionary<string, ConcurrentDictionary<string, SearchParameterInfo>>();
         }
 
         [Theory]
@@ -78,8 +79,8 @@ namespace Microsoft.Health.Fhir.Core.UnitTests.Features.Definition
             Bundle staticBundle = Definitions.GetDefinition("SearchParameters");
 
             Assert.Equal(
-                staticBundle.Entry.Select(entry => entry.FullUrl),
-                _uriDictionary.Values.Select(value => value.Url.ToString()));
+                staticBundle.Entry.Select(entry => entry.FullUrl).OrderBy(s => s, StringComparer.OrdinalIgnoreCase),
+                _uriDictionary.Values.Select(value => value.Url.ToString()).OrderBy(s => s, StringComparer.OrdinalIgnoreCase));
         }
 
         [Fact]
@@ -166,11 +167,11 @@ namespace Microsoft.Health.Fhir.Core.UnitTests.Features.Definition
         {
             Assert.Equal(expectedEntries.Length, searchParametersDictionary.Count);
 
-            foreach ((string name, SearchParamType searchParameterType, string expression) in expectedEntries)
+            foreach ((string code, SearchParamType searchParameterType, string expression) in expectedEntries)
             {
-                Assert.True(searchParametersDictionary.TryGetValue(name, out SearchParameterInfo searchParameter));
+                Assert.True(searchParametersDictionary.TryGetValue(code, out SearchParameterInfo searchParameter));
 
-                Assert.Equal(name, searchParameter.Name);
+                Assert.Equal(code, searchParameter.Code);
                 Assert.Equal(searchParameterType.ToValueSet(), searchParameter.Type);
                 Assert.Equal(expression, searchParameter.Expression);
             }

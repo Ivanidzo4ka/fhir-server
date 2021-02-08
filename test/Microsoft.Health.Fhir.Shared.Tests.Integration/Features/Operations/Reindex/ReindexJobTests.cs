@@ -188,7 +188,7 @@ namespace Microsoft.Health.Fhir.Tests.Integration.Features.Operations.Reindex
         }
 
         [Fact]
-        public async Task GivenNoMatchingResources_WhenRunningReindexJob_ThenJobIsCompleted()
+        public async Task GivenNoMatchingResources_WhenRunningReindexJob_ThenJobIsCanceled()
         {
             var searchParam = _supportedSearchParameterDefinitionManager.GetSearchParameter(new Uri("http://hl7.org/fhir/SearchParameter/Measure-name"));
             searchParam.IsSearchable = false;
@@ -213,7 +213,7 @@ namespace Microsoft.Health.Fhir.Tests.Integration.Features.Operations.Reindex
                 var reindexJobWrapper = await _fhirOperationDataStore.GetReindexJobByIdAsync(response.Job.JobRecord.Id, cancellationTokenSource.Token);
 
                 int delayCount = 0;
-                while (reindexJobWrapper.JobRecord.Status != OperationStatus.Completed
+                while (reindexJobWrapper.JobRecord.Status != OperationStatus.Canceled
                     && delayCount < 10)
                 {
                     await Task.Delay(1000);
@@ -234,8 +234,10 @@ namespace Microsoft.Health.Fhir.Tests.Integration.Features.Operations.Reindex
         public async Task GivenNewSearchParam_WhenReindexJobCompleted_ThenParamIsSearchable()
         {
             var searchParamName = "foo";
+            var searchParamCode = "fooCode";
             var searchParam = new SearchParameterInfo(
                 name: searchParamName,
+                code: searchParamCode,
                 searchParamType: ValueSets.SearchParamType.String,
                 url: new Uri("http://hl7.org/fhir/SearchParameter/Patient-foo"),
                 components: null,
@@ -247,16 +249,16 @@ namespace Microsoft.Health.Fhir.Tests.Integration.Features.Operations.Reindex
                 IsSearchable = false,
             };
 
-            _searchParameterDefinitionManager.UrlLookup.Add(searchParam.Url, searchParam);
-            _searchParameterDefinitionManager.TypeLookup["Patient"].Add(searchParamName, searchParam);
+            _searchParameterDefinitionManager.UrlLookup.TryAdd(searchParam.Url, searchParam);
+            _searchParameterDefinitionManager.TypeLookup["Patient"].TryAdd(searchParamCode, searchParam);
 
             await UpsertPatientData("searchIndicesPatient1");
             await UpsertPatientData("searchIndicesPatient2");
 
-            var queryParams = new List<Tuple<string, string>>() { new Tuple<string, string>("foo", "searchIndicesPatient1") };
+            var queryParams = new List<Tuple<string, string>>() { new Tuple<string, string>("fooCode", "searchIndicesPatient1") };
             var searchResults = await _searchService.Value.SearchAsync("Patient", queryParams, CancellationToken.None);
 
-            Assert.Equal(searchParamName, searchResults.UnsupportedSearchParameters.FirstOrDefault().Item1);
+            Assert.Equal(searchParamCode, searchResults.UnsupportedSearchParameters.FirstOrDefault().Item1);
             Assert.Equal(2, searchResults.Results.Count());
 
             var searchIndexValues1 = new List<SearchIndexEntry>();

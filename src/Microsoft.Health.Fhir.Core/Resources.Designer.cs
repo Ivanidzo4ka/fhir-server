@@ -277,6 +277,33 @@ namespace Microsoft.Health.Fhir.Core {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to An error occurred deleting the custom search parameter.  The issue must be resolved and the delete request resubmitted to remove the parameter..
+        /// </summary>
+        internal static string CustomSearchDeleteError {
+            get {
+                return ResourceManager.GetString("CustomSearchDeleteError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Custom Search parameter with Uri: {0} was not found..
+        /// </summary>
+        internal static string CustomSearchParameterNotfound {
+            get {
+                return ResourceManager.GetString("CustomSearchParameterNotfound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to An error occurred updating the custom search parameter.  The issue must be resolved and the update resubmitted to be applied..
+        /// </summary>
+        internal static string CustomSearchUpdateError {
+            get {
+                return ResourceManager.GetString("CustomSearchUpdateError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The date time string &apos;{0}&apos; is not in a correct format..
         /// </summary>
         internal static string DateTimeStringIsIncorrectlyFormatted {
@@ -602,6 +629,15 @@ namespace Microsoft.Health.Fhir.Core {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to No resources were found matching the type of the updated search parameters needing to be reindexed.  ReindexJob cancelled..
+        /// </summary>
+        internal static string NoResourcesNeedToBeReindexed {
+            get {
+                return ResourceManager.GetString("NoResourcesNeedToBeReindexed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to No search parameters found needing to be indexed.  Job cancelled..
         /// </summary>
         internal static string NoSearchParametersNeededToBeIndexed {
@@ -670,6 +706,24 @@ namespace Microsoft.Health.Fhir.Core {
         internal static string OrDelimiter {
             get {
                 return ResourceManager.GetString("OrDelimiter", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to X-Provenance header is malformed and can&apos;t be parsed.
+        /// </summary>
+        internal static string ProvenanceHeaderMalformed {
+            get {
+                return ResourceManager.GetString("ProvenanceHeaderMalformed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to X-Provenance header shall not have a specified `Provenance.target`.
+        /// </summary>
+        internal static string ProvenanceHeaderShouldntHaveTarget {
+            get {
+                return ResourceManager.GetString("ProvenanceHeaderShouldntHaveTarget", resourceCulture);
             }
         }
         
