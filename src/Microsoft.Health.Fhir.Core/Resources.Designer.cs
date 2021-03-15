@@ -548,6 +548,15 @@ namespace Microsoft.Health.Fhir.Core {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Invalid target type &apos;{0}&apos;. Valid targets are &apos;{1}&apos;.
+        /// </summary>
+        internal static string InvalidTargetType {
+            get {
+                return ResourceManager.GetString("InvalidTargetType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The &apos;_total&apos; parameter value &apos;{0}&apos; is invalid. The supported values are: {1}..
         /// </summary>
         internal static string InvalidTotalParameter {
